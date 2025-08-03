@@ -38,3 +38,24 @@ export async function addProject(db: ReturnType<typeof useSQLiteContext>, name: 
     throw error;
   }
 }
+
+export async function updateProject(
+  db: ReturnType<typeof useSQLiteContext>,
+  id: number,
+  description: string,
+  budget: number
+) {
+  try {
+    await db.runAsync(
+      `
+      UPDATE projects 
+      SET description = ?, budget = ?, updated_at = CURRENT_TIMESTAMP 
+      WHERE id = ?
+      `,
+      [description, budget, id]
+    );
+  } catch (error) {
+    console.error('Error updating project:', error);
+    throw error;
+  }
+}

@@ -7,7 +7,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 export default function Layout() {
   const handleInit = async (db: any) => {
     await initializeDatabase(db);
-    await insertDummyData(db); // ← Seed data after init
+    await insertDummyData(db);
   };
 
   return (
