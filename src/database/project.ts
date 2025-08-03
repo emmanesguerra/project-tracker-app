@@ -1,0 +1,40 @@
+import { useSQLiteContext } from 'expo-sqlite';
+import { useEffect, useState } from 'react';
+
+export interface Project {
+  id: number;
+  name: string;
+  description: string | null;
+  budget: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export function useProjects() {
+  const db = useSQLiteContext();
+  const [projects, setProjects] = useState<Project[]>([]);
+
+  const fetchProjects = async () => {
+    try {
+      const results = await db.getAllAsync<Project>('SELECT * FROM projects ORDER BY created_at DESC');
+      setProjects(results);
+    } catch (error) {
+      console.error('Error fetching projects:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  return { projects, refreshProjects: fetchProjects, db };
+}
+
+export async function addProject(db: ReturnType<typeof useSQLiteContext>, name: string) {
+  try {
+    await db.runAsync('INSERT INTO projects (name) VALUES (?)', [name]);
+  } catch (error) {
+    console.error('Error adding project:', error);
+    throw error;
+  }
+}
