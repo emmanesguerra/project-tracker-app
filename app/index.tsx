@@ -1,4 +1,5 @@
 import { addProject, useProjects } from '@/src/database/project';
+import { Link } from 'expo-router';
 import { useState } from 'react';
 import { FlatList, Modal, Pressable, StatusBar, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -46,15 +47,18 @@ export default function HomePage() {
         data={projects}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
-          <View style={{ marginBottom: 12, padding: 12, backgroundColor: '#f0f0f0', borderRadius: 8 }}>
-            <Text>{item.id}</Text>
-            <Text style={{ fontSize: 16, fontWeight: '600' }}>{item.name}</Text>
-            <Text>{item.description}</Text>
-            <Text>{item.budget}</Text>
-            <Text>{item.created_at}</Text>
-            <Text>{item.updated_at}</Text>
-          </View>
-        )}
+          <Link href={{ pathname: "/project/[id]", params: { id: item.id.toString() } }} asChild>
+            <Pressable style={{ marginBottom: 12, padding: 12, backgroundColor: '#f0f0f0', borderRadius: 8 }}>
+              <Text>{item.id}</Text>
+              <Text style={{ fontSize: 16, fontWeight: '600' }}>{item.name}</Text>
+              <Text>{item.description}</Text>
+              <Text>{item.budget}</Text>
+              <Text>{item.created_at}</Text>
+              <Text>{item.updated_at}</Text>
+            </Pressable>
+          </Link>
+        )
+        }
       />
 
       {/* Modal for new project */}
@@ -106,6 +110,6 @@ export default function HomePage() {
           </View>
         </View>
       </Modal>
-    </SafeAreaView>
+    </SafeAreaView >
   );
 }
