@@ -10,7 +10,7 @@ import * as FileSystem from 'expo-file-system';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useState } from 'react';
-import { Alert, Button, Platform, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Platform, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function NewReceiptPage() {
@@ -97,9 +97,14 @@ export default function NewReceiptPage() {
         }
     };
 
-    return (            
+    const handleCancel = () => {
+        router.back(); // This navigates back to the previous screen
+    };
+
+    return (
         <SafeAreaView style={styles.container}>
-            <Text style={styles.pageTitle}>{projectName ? `Receipt for ${projectName}` : 'New Receipt'}</Text>
+            <Text style={styles.pageSubtitle}>{projectName ? `Receipt for` : 'New Receipt'}</Text>
+            <Text style={styles.pageTitle}>{projectName ? `${projectName}` : 'New Receipt'}</Text>
 
             <Text style={styles.label}>Name</Text>
             <TextInput
@@ -156,7 +161,15 @@ export default function NewReceiptPage() {
                 />
             )}
 
-            <Button title="Save Receipt" onPress={handleSave} />
+            <View style={styles.buttonContainer}>
+                <TouchableOpacity onPress={handleCancel} style={styles.cancelButton2}>
+                    <Text style={styles.cancelText2}>Cancel</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={handleSave} style={styles.saveButton2}>
+                    <Text style={styles.saveButtonText2}>Save Receipt</Text>
+                </TouchableOpacity>
+            </View>
 
             <CategoryModal
                 visible={showCategoryModal}

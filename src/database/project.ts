@@ -43,6 +43,7 @@ export async function addProject(db: ReturnType<typeof useSQLiteContext>, name: 
 export async function updateProject(
   db: ReturnType<typeof useSQLiteContext>,
   id: number,
+  projectName: string,
   description: string,
   budget: number
 ) {
@@ -50,10 +51,10 @@ export async function updateProject(
     await db.runAsync(
       `
       UPDATE projects 
-      SET description = ?, budget = ?, updated_at = CURRENT_TIMESTAMP 
+      SET name = ?, description = ?, budget = ?, updated_at = CURRENT_TIMESTAMP 
       WHERE id = ?
       `,
-      [description, budget, id]
+      [projectName, description, budget, id]
     );
   } catch (error) {
     console.error('Error updating project:', error);

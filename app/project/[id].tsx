@@ -2,7 +2,6 @@ import EditProjectModal from '@/src/components/modal/EditProjectModal';
 import { getProjectById, updateProject as saveProjectChanges } from '@/src/database/project';
 import { useReceipts } from '@/src/database/receipts';
 import { styles } from '@/src/styles/global';
-import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
@@ -21,6 +20,7 @@ export default function ProjectPage() {
     const { id } = useLocalSearchParams<{ id: string }>();
     const db = useSQLiteContext();
     const [project, setProject] = useState<any>(null);
+    const [projectName, setProjectName] = useState('');
     const [modalVisible, setModalVisible] = useState(false);
     const [description, setDescription] = useState('');
     const [budget, setBudget] = useState('');
@@ -32,6 +32,7 @@ export default function ProjectPage() {
             const result = await getProjectById(db, Number(id));
             if (result) {
                 setProject(result);
+                setProjectName(result.name || '');
                 setDescription(result.description || '');
                 setBudget(result.budget?.toString() || '');
             }
@@ -42,7 +43,7 @@ export default function ProjectPage() {
 
     const handleSave = async () => {
         try {
-            await saveProjectChanges(db, project.id, description, parseFloat(budget));
+            await saveProjectChanges(db, project.id, projectName.trim(), description, parseFloat(budget));
             await fetchProject();
             setModalVisible(false);
         } catch (error) {
@@ -91,23 +92,17 @@ export default function ProjectPage() {
         <SafeAreaView style={styles.container}>
             <Text style={styles.pageTitle}>{project.name}</Text>
 
-            <View style={styles.box}>
-                <View style={styles.editButtonContainer}>
-                    <TouchableOpacity style={styles.editButton} onPress={() => setModalVisible(true)}>
-                        <FontAwesome6 name="edit" size={24} color="black" />
-                    </TouchableOpacity>
-                </View>
-
+            <TouchableOpacity style={styles.box} onPress={() => setModalVisible(true)}>
                 {project.description && project.description.length > 0 && (
-                <Text style={styles.label}>{project.description}</Text>
+                    <Text style={styles.label}>{project.description}</Text>
                 )}
-                {project.budget && project.budget.length > 0 && (
-                <Text style={styles.label}>Budget: ₱{project.budget}</Text>
+                {project.budget != null && project.budget !== 0 && (
+                    <Text style={styles.label}>Budget: ₱{project.budget}</Text>
                 )}
                 <Text style={styles.label}>Expense: ₱{project.total_expense}</Text>
                 <Text style={[styles.label, styles.small]}>Create: {project.created_at}</Text>
                 <Text style={[styles.label, styles.small]}>Update: {project.updated_at}</Text>
-            </View>
+            </TouchableOpacity >
 
             <View style={styles.receiptHeader}>
                 <Text style={styles.receiptTitle}>Receipts</Text>
@@ -174,6 +169,8 @@ export default function ProjectPage() {
 
             <EditProjectModal
                 visible={modalVisible}
+                projectName={projectName}
+                setProjectName={setProjectName}
                 description={description}
                 setDescription={setDescription}
                 budget={budget}

@@ -4,6 +4,8 @@ import { Button, Modal, Text, TextInput, View } from 'react-native';
 
 interface EditProjectModalProps {
     visible: boolean;
+    projectName: string;
+    setProjectName: (text: string) => void;
     description: string;
     budget: string;
     setDescription: (text: string) => void;
@@ -14,8 +16,10 @@ interface EditProjectModalProps {
 
 const EditProjectModal: FC<EditProjectModalProps> = ({
     visible,
+    projectName,
     description,
     budget,
+    setProjectName,
     setDescription,
     setBudget,
     onCancel,
@@ -26,6 +30,14 @@ const EditProjectModal: FC<EditProjectModalProps> = ({
             <View style={styles.modalOverlay}>
                 <View style={styles.modalContent}>
                     <Text style={styles.pageTitle}>Edit Project</Text>
+
+                    <Text style={styles.label}>Project Name</Text>
+                    <TextInput
+                        value={projectName}
+                        onChangeText={setProjectName}
+                        placeholder="Enter project name"
+                        style={styles.input}
+                    />
 
                     <Text style={styles.label}>Description</Text>
                     <TextInput

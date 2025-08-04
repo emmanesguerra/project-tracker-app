@@ -115,7 +115,12 @@ export const styles = StyleSheet.create({
     pageTitle: {
         fontSize: 24,
         fontWeight: 'bold',
-        marginBottom: 10,
+        marginBottom: 15,
+        color: colors.textDark,
+    },
+    pageSubtitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
         color: colors.textDark,
     },
     editButtonContainer: {
@@ -209,6 +214,7 @@ export const styles = StyleSheet.create({
         minHeight: 80,
         textAlignVertical: 'top',
         marginBottom: 16,
+        backgroundColor: "#fff",
     },
     input: {
         borderWidth: 1,
@@ -216,6 +222,7 @@ export const styles = StyleSheet.create({
         padding: 15,
         marginBottom: 12,
         borderRadius: 6,
+        backgroundColor: "#fff",
     },
     row: {
         flexDirection: 'row',
@@ -231,6 +238,7 @@ export const styles = StyleSheet.create({
         borderRadius: 6,
         marginBottom: 8,
         overflow: 'hidden',
+        backgroundColor: "#fff",
     },
     modalBackdrop: {
         flex: 1,
@@ -263,7 +271,7 @@ export const styles = StyleSheet.create({
         justifyContent: 'flex-end',
         gap: 10,
     },
-    
+
     modalOverlay: {
         flex: 1,
         backgroundColor: 'rgba(0,0,0,0.3)',
@@ -277,7 +285,7 @@ export const styles = StyleSheet.create({
         width: '90%',
     },
 
-    
+
     overlay: {
         flex: 1,
         backgroundColor: 'rgba(0,0,0,0.4)',
@@ -309,5 +317,36 @@ export const styles = StyleSheet.create({
     },
     saveText: {
         color: '#fff',
+    },
+    buttonContainer: {
+        position: 'absolute',
+        bottom: 20,
+        left: 20,
+        right: 20,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        gap: 10,
+    },
+    cancelButton2: {
+        flex: 1,
+        backgroundColor: '#ccc',
+        paddingVertical: 12,
+        borderRadius: 8,
+        alignItems: 'center',
+    },
+    saveButton2: {
+        flex: 1,
+        backgroundColor: '#4CAF50',
+        paddingVertical: 12,
+        borderRadius: 8,
+        alignItems: 'center',
+    },
+    cancelText2: {
+        color: '#333',
+        fontWeight: 'bold',
+    },
+    saveButtonText2: {
+        color: '#fff',
+        fontWeight: 'bold',
     },
 });
