@@ -5,7 +5,15 @@ import { Feather } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useEffect, useState } from 'react';
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+    FlatList,
+    Image,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ProjectPage() {
@@ -16,6 +24,7 @@ export default function ProjectPage() {
     const [description, setDescription] = useState('');
     const [budget, setBudget] = useState('');
     const { receipts, refreshReceipts } = useReceipts(project?.id);
+    const [receiptImages, setReceiptImages] = useState<Record<number, string[]>>({});
 
     const fetchProject = async () => {
         try {
@@ -40,9 +49,34 @@ export default function ProjectPage() {
         }
     };
 
+    const fetchImagesForReceipts = async () => {
+        if (!receipts || receipts.length === 0) return;
+        const imagesMap: Record<number, string[]> = {};
+
+        for (const receipt of receipts) {
+            try {
+                const images = await db.getAllAsync<{ image_name: string }>(
+                    `SELECT image_name FROM receipt_images WHERE receipt_id = ?`,
+                    [receipt.id]
+                );
+                imagesMap[receipt.id] = images.map((img) => img.image_name);
+            } catch (error) {
+                console.error(`Error loading images for receipt ${receipt.id}:`, error);
+            }
+        }
+
+        setReceiptImages(imagesMap);
+    };
+
     useEffect(() => {
         fetchProject();
     }, [id]);
+
+    useEffect(() => {
+        if (receipts.length > 0) {
+            fetchImagesForReceipts();
+        }
+    }, [receipts]);
 
     if (!project) {
         return (
@@ -57,7 +91,6 @@ export default function ProjectPage() {
             <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 10 }}>{project.name}</Text>
 
             <View style={styles.box}>
-
                 <View style={{ position: 'absolute', right: 8, top: 8 }}>
                     <TouchableOpacity
                         style={{
@@ -68,8 +101,9 @@ export default function ProjectPage() {
                         }}
                         onPress={() => setModalVisible(true)}
                     >
-
-                        <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 14 }}><Feather name="edit" size={16} color="#FFF" /></Text>
+                        <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 14 }}>
+                            <Feather name="edit" size={16} color="#FFF" />
+                        </Text>
                     </TouchableOpacity>
                 </View>
 
@@ -79,8 +113,17 @@ export default function ProjectPage() {
                 <Text style={styles.label}>Updated At: {project.updated_at}</Text>
             </View>
 
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 20, marginBottom: 20 }}>Receipts</Text>
+            <View
+                style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: 16,
+                }}
+            >
+                <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 20, marginBottom: 20 }}>
+                    Receipts
+                </Text>
 
                 <TouchableOpacity
                     style={{
@@ -89,9 +132,17 @@ export default function ProjectPage() {
                         paddingHorizontal: 12,
                         borderRadius: 6,
                     }}
-                    onPress={() => router.push(`/receipts/new?projectId=${project.id}&projectName=${encodeURIComponent(project.name)}`)}
+                    onPress={() =>
+                        router.push(
+                            `/receipts/new?projectId=${project.id}&projectName=${encodeURIComponent(
+                                project.name
+                            )}`
+                        )
+                    }
                 >
-                    <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 14 }}>+ Add receipt</Text>
+                    <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 14 }}>
+                        + Add receipt
+                    </Text>
                 </TouchableOpacity>
             </View>
 
@@ -99,18 +150,26 @@ export default function ProjectPage() {
                 data={receipts}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={({ item }) => (
-                    <View
-                        style={{
-                            backgroundColor: '#f0f0f0',
-                            padding: 12,
-                            borderRadius: 8,
-                            marginBottom: 10,
-                        }}
-                    >
+                    <View style={styles.receiptCard}>
                         <Text style={{ fontWeight: 'bold' }}>{item.name}</Text>
                         <Text>₱{item.amount.toFixed(2)}</Text>
                         <Text>{item.category_name}</Text>
-                        <Text style={{ fontSize: 12, color: 'gray' }}>Issued At: {item.issued_at}</Text>
+                        <Text style={{ fontSize: 12, color: 'gray' }}>
+                            Issued At: {item.issued_at}
+                        </Text>
+
+                        {receiptImages[item.id]?.length > 0 && (
+                            <ScrollView horizontal style={{ marginTop: 8 }}>
+                                {receiptImages[item.id].map((uri, index) => (
+                                    <Image
+                                        key={index}
+                                        source={{ uri }}
+                                        style={styles.image}
+                                        resizeMode="cover"
+                                    />
+                                ))}
+                            </ScrollView>
+                        )}
                     </View>
                 )}
                 ListEmptyComponent={
@@ -144,5 +203,17 @@ const styles = StyleSheet.create({
     label: {
         fontSize: 14,
         marginBottom: 6,
+    },
+    receiptCard: {
+        backgroundColor: '#f0f0f0',
+        padding: 12,
+        borderRadius: 8,
+        marginBottom: 10,
+    },
+    image: {
+        width: 100,
+        height: 100,
+        marginRight: 10,
+        borderRadius: 8,
     },
 });

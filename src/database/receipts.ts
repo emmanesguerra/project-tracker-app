@@ -54,17 +54,54 @@ export async function addReceipt(
     name: string,
     amount: number,
     issuedAt: string
-) {
+): Promise<number> {
     try {
         await db.runAsync(
             `
-      INSERT INTO receipts (project_id, category_id, name, amount, issued_at) 
-      VALUES (?, ?, ?, ?, ?)
-      `,
+            INSERT INTO receipts (project_id, category_id, name, amount, issued_at) 
+            VALUES (?, ?, ?, ?, ?)
+            `,
             [projectId, categoryId, name, amount, issuedAt]
         );
+
+        // Get the ID of the newly inserted row
+        const result = await db.getFirstAsync<{ id: number }>(
+            `SELECT last_insert_rowid() as id`
+        );
+
+        return result?.id ?? -1;
     } catch (error) {
         console.error('Error adding receipt:', error);
         throw error;
     }
+}
+
+export async function addReceiptImage(
+    db: ReturnType<typeof useSQLiteContext>,
+    receiptId: number,
+    imageName: string
+) {
+    try {
+        await db.runAsync(
+            `
+            INSERT INTO receipt_images (receipt_id, image_name) 
+            VALUES (?, ?)
+            `,
+            [receiptId, imageName]
+        );
+    } catch (error) {
+        console.error('Error adding receipt image:', error);
+        throw error;
+    }
+}
+
+export async function getReceiptImages(
+  db: ReturnType<typeof useSQLiteContext>,
+  receiptId: number
+): Promise<string[]> {
+  const rows = await db.getAllAsync<{ image_name: string }>(
+    `SELECT image_name FROM receipt_images WHERE receipt_id = ?`,
+    [receiptId]
+  );
+  return rows.map((row) => row.image_name);
 }

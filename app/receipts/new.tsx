@@ -1,9 +1,11 @@
 import ImageCaptureContainer from '@/src/components/ImageCaptureContainer';
 import CategoryModal from '@/src/components/modal/CategoryModal';
 import { addCategory, useCategories } from '@/src/database/categories';
-import { addReceipt } from '@/src/database/receipts';
+import { addReceipt, addReceiptImage } from '@/src/database/receipts';
+import { generateImageFilename } from '@/src/utils/filename';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
+import * as FileSystem from 'expo-file-system';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useState } from 'react';
@@ -12,6 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function NewReceiptPage() {
     const { projectId, projectName } = useLocalSearchParams();
+    const numericProjectId = Number(projectId);
     const db = useSQLiteContext();
     const router = useRouter();
 
@@ -34,14 +37,34 @@ export default function NewReceiptPage() {
         }
 
         try {
-            await addReceipt(
+            const newReceiptId = await addReceipt(
                 db,
-                Number(projectId),
+                numericProjectId,
                 categoryId,
                 name,
                 parseFloat(amount),
                 issuedAt.toISOString().slice(0, 10)
             );
+
+            for (let i = 0; i < imageUris.length; i++) {
+                const uri = imageUris[i];
+
+                const filename = generateImageFilename(numericProjectId, newReceiptId, i + 1);
+                const folderPath = `${projectId}/${newReceiptId}`;
+                const newPath = `${FileSystem.documentDirectory}${folderPath}/${filename}`;
+
+                // Ensure directory exists
+                await FileSystem.makeDirectoryAsync(`${FileSystem.documentDirectory}${folderPath}`, {
+                    intermediates: true,
+                });
+
+                // Copy image to app storage
+                await FileSystem.copyAsync({ from: uri, to: newPath });
+
+                // Save to database
+                await addReceiptImage(db, newReceiptId, newPath);
+            }
+
             Alert.alert('Success', 'Receipt added');
             router.back();
         } catch (err) {
