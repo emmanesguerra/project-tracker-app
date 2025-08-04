@@ -46,7 +46,7 @@ const EditProjectModal: FC<EditProjectModalProps> = ({
                     />
 
                     <View style={styles.actions}>
-                        <Button title="Cancel" onPress={onCancel} />
+                        <Button title="Cancel" color="gray" onPress={onCancel} />
                         <Button title="Save" onPress={onSave} />
                     </View>
                 </View>

@@ -1,11 +1,11 @@
-import { useCategories } from '@/src/database/categories';
+import { addCategory, useCategories } from '@/src/database/categories';
 import { addReceipt } from '@/src/database/receipts';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useState } from 'react';
-import { Alert, Button, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Button, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function NewReceiptPage() {
@@ -19,7 +19,10 @@ export default function NewReceiptPage() {
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [categoryId, setCategoryId] = useState<number | null>(null);
 
-    const { categories } = useCategories();
+    const [showCategoryModal, setShowCategoryModal] = useState(false);
+    const [newCategoryName, setNewCategoryName] = useState('');
+
+    const { categories, refreshCategories } = useCategories();
 
     const handleSave = async () => {
         if (!name || !amount || isNaN(Number(amount))) {
@@ -44,7 +47,23 @@ export default function NewReceiptPage() {
         }
     };
 
-    const onDateChange = (event: any, date?: Date) => {
+    const handleAddCategory = async () => {
+        if (!newCategoryName.trim()) {
+            Alert.alert('Validation Error', 'Category name cannot be empty.');
+            return;
+        }
+
+        try {
+            await addCategory(db, newCategoryName.trim());
+            setNewCategoryName('');
+            setShowCategoryModal(false);
+            await refreshCategories();
+        } catch (error) {
+            Alert.alert('Error', 'Failed to add category.');
+        }
+    };
+
+    const onDateChange = (_: any, date?: Date) => {
         setShowDatePicker(false);
         if (date) {
             setIssuedAt(date);
@@ -55,7 +74,7 @@ export default function NewReceiptPage() {
         <SafeAreaView style={styles.container}>
             <Text style={styles.header}>{projectName ? `Receipt for ${projectName}` : 'New Receipt'}</Text>
 
-            <Text>Name</Text>
+            <Text style={styles.label}>Name</Text>
             <TextInput
                 value={name}
                 onChangeText={setName}
@@ -63,12 +82,14 @@ export default function NewReceiptPage() {
                 style={styles.input}
             />
 
-            <Text>Category</Text>
+            <View style={styles.categoryHeader}>
+                <Text style={styles.label}>Category</Text>
+                <TouchableOpacity onPress={() => setShowCategoryModal(true)}>
+                    <Text style={styles.addCategory}>+ Add New Category</Text>
+                </TouchableOpacity>
+            </View>
             <View style={styles.pickerWrapper}>
-                <Picker
-                    selectedValue={categoryId}
-                    onValueChange={(itemValue) => setCategoryId(itemValue)}
-                >
+                <Picker selectedValue={categoryId} onValueChange={(itemValue) => setCategoryId(itemValue)}>
                     <Picker.Item label="Select Category" value={null} />
                     {categories.map((category) => (
                         <Picker.Item key={category.id} label={category.name} value={category.id} />
@@ -78,7 +99,7 @@ export default function NewReceiptPage() {
 
             <View style={styles.row}>
                 <View style={styles.halfInputContainer}>
-                    <Text>Amount (₱)</Text>
+                    <Text style={styles.label}>Amount (₱)</Text>
                     <TextInput
                         value={amount}
                         onChangeText={setAmount}
@@ -89,7 +110,7 @@ export default function NewReceiptPage() {
                 </View>
 
                 <View style={styles.halfInputContainer}>
-                    <Text>Issued At</Text>
+                    <Text style={styles.label}>Issued At</Text>
                     <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.input}>
                         <Text>{issuedAt.toISOString().slice(0, 10)}</Text>
                     </TouchableOpacity>
@@ -106,6 +127,25 @@ export default function NewReceiptPage() {
             )}
 
             <Button title="Save Receipt" onPress={handleSave} />
+
+            {/* Modal for Adding Category */}
+            <Modal visible={showCategoryModal} transparent animationType="slide">
+                <View style={styles.modalBackdrop}>
+                    <View style={styles.modalContainer}>
+                        <Text style={styles.modalTitle}>New Category</Text>
+                        <TextInput
+                            placeholder="Category name"
+                            value={newCategoryName}
+                            onChangeText={setNewCategoryName}
+                            style={styles.input}
+                        />
+                        <View style={styles.actions}>
+                            <Button title="Cancel" color="gray" onPress={() => setShowCategoryModal(false)} />
+                            <Button title="Save" onPress={handleAddCategory} />
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </SafeAreaView>
     );
 }
@@ -132,7 +172,45 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#ccc',
         borderRadius: 6,
-        marginBottom: 12,
+        marginBottom: 8,
         overflow: 'hidden',
+    },
+    addButton: {
+        marginBottom: 12,
+    },
+    modalBackdrop: {
+        flex: 1,
+        justifyContent: 'center',
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        padding: 20,
+    },
+    modalContainer: {
+        backgroundColor: 'white',
+        borderRadius: 10,
+        padding: 20,
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 12,
+    },
+    categoryHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-end',
+        marginBottom: 4,
+    },
+    label: {
+        fontSize: 16,
+        fontWeight: '500',
+    },
+    addCategory: {
+        fontSize: 12,
+        color: '#007bff',
+    },
+    actions: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        gap: 10,
     },
 });
