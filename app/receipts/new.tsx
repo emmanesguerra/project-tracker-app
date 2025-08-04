@@ -1,3 +1,4 @@
+import CategoryModal from '@/src/components/modal/CategoryModal';
 import { addCategory, useCategories } from '@/src/database/categories';
 import { addReceipt } from '@/src/database/receipts';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -5,7 +6,7 @@ import { Picker } from '@react-native-picker/picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useState } from 'react';
-import { Alert, Button, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Button, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function NewReceiptPage() {
@@ -128,24 +129,13 @@ export default function NewReceiptPage() {
 
             <Button title="Save Receipt" onPress={handleSave} />
 
-            {/* Modal for Adding Category */}
-            <Modal visible={showCategoryModal} transparent animationType="slide">
-                <View style={styles.modalBackdrop}>
-                    <View style={styles.modalContainer}>
-                        <Text style={styles.modalTitle}>New Category</Text>
-                        <TextInput
-                            placeholder="Category name"
-                            value={newCategoryName}
-                            onChangeText={setNewCategoryName}
-                            style={styles.input}
-                        />
-                        <View style={styles.actions}>
-                            <Button title="Cancel" color="gray" onPress={() => setShowCategoryModal(false)} />
-                            <Button title="Save" onPress={handleAddCategory} />
-                        </View>
-                    </View>
-                </View>
-            </Modal>
+            <CategoryModal
+                visible={showCategoryModal}
+                onClose={() => setShowCategoryModal(false)}
+                onSave={handleAddCategory}
+                categoryName={newCategoryName}
+                setCategoryName={setNewCategoryName}
+            />
         </SafeAreaView>
     );
 }
