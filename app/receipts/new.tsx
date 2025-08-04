@@ -2,6 +2,7 @@ import ImageCaptureContainer from '@/src/components/ImageCaptureContainer';
 import CategoryModal from '@/src/components/modal/CategoryModal';
 import { addCategory, useCategories } from '@/src/database/categories';
 import { addReceipt, addReceiptImage } from '@/src/database/receipts';
+import { styles } from '@/src/styles/global';
 import { generateImageFilename } from '@/src/utils/filename';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
@@ -9,7 +10,7 @@ import * as FileSystem from 'expo-file-system';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useState } from 'react';
-import { Alert, Button, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Button, Platform, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function NewReceiptPage() {
@@ -96,9 +97,9 @@ export default function NewReceiptPage() {
         }
     };
 
-    return (
+    return (            
         <SafeAreaView style={styles.container}>
-            <Text style={styles.header}>{projectName ? `Receipt for ${projectName}` : 'New Receipt'}</Text>
+            <Text style={styles.pageTitle}>{projectName ? `Receipt for ${projectName}` : 'New Receipt'}</Text>
 
             <Text style={styles.label}>Name</Text>
             <TextInput
@@ -167,68 +168,3 @@ export default function NewReceiptPage() {
         </SafeAreaView>
     );
 }
-
-const styles = StyleSheet.create({
-    container: { flex: 1, padding: 16 },
-    header: { fontSize: 22, fontWeight: 'bold', marginBottom: 16 },
-    input: {
-        borderWidth: 1,
-        borderColor: '#ccc',
-        padding: 10,
-        marginBottom: 12,
-        borderRadius: 6,
-    },
-    row: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        gap: 10,
-    },
-    halfInputContainer: {
-        flex: 1,
-    },
-    pickerWrapper: {
-        borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: 6,
-        marginBottom: 8,
-        overflow: 'hidden',
-    },
-    addButton: {
-        marginBottom: 12,
-    },
-    modalBackdrop: {
-        flex: 1,
-        justifyContent: 'center',
-        backgroundColor: 'rgba(0,0,0,0.5)',
-        padding: 20,
-    },
-    modalContainer: {
-        backgroundColor: 'white',
-        borderRadius: 10,
-        padding: 20,
-    },
-    modalTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 12,
-    },
-    categoryHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'flex-end',
-        marginBottom: 4,
-    },
-    label: {
-        fontSize: 16,
-        fontWeight: '500',
-    },
-    addCategory: {
-        fontSize: 12,
-        color: '#007bff',
-    },
-    actions: {
-        flexDirection: 'row',
-        justifyContent: 'flex-end',
-        gap: 10,
-    },
-});

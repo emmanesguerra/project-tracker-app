@@ -1,5 +1,6 @@
+import { styles } from '@/src/styles/global';
 import { FC } from 'react';
-import { Button, Modal, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Button, Modal, Text, TextInput, View } from 'react-native';
 
 interface EditProjectModalProps {
     visible: boolean;
@@ -24,7 +25,7 @@ const EditProjectModal: FC<EditProjectModalProps> = ({
         <Modal visible={visible} animationType="slide" transparent>
             <View style={styles.modalOverlay}>
                 <View style={styles.modalContent}>
-                    <Text style={styles.title}>Edit Project</Text>
+                    <Text style={styles.pageTitle}>Edit Project</Text>
 
                     <Text style={styles.label}>Description</Text>
                     <TextInput
@@ -57,47 +58,3 @@ const EditProjectModal: FC<EditProjectModalProps> = ({
 
 export default EditProjectModal;
 
-const styles = StyleSheet.create({
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.3)',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    modalContent: {
-        backgroundColor: '#fff',
-        padding: 16,
-        borderRadius: 12,
-        width: '90%',
-    },
-    title: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 10,
-    },
-    label: {
-        fontWeight: 'bold',
-        marginBottom: 4,
-    },
-    textArea: {
-        borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: 8,
-        padding: 8,
-        minHeight: 80,
-        textAlignVertical: 'top',
-        marginBottom: 16,
-    },
-    input: {
-        borderWidth: 1,
-        borderColor: '#ccc',
-        padding: 8,
-        marginBottom: 12,
-        borderRadius: 6,
-    },
-    actions: {
-        flexDirection: 'row',
-        justifyContent: 'flex-end',
-        gap: 10,
-    },
-});

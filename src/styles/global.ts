@@ -201,4 +201,113 @@ export const styles = StyleSheet.create({
         fontStyle: 'italic',
         marginTop: 10,
     },
+    textArea: {
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 8,
+        padding: 15,
+        minHeight: 80,
+        textAlignVertical: 'top',
+        marginBottom: 16,
+    },
+    input: {
+        borderWidth: 1,
+        borderColor: '#ccc',
+        padding: 15,
+        marginBottom: 12,
+        borderRadius: 6,
+    },
+    row: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        gap: 10,
+    },
+    halfInputContainer: {
+        flex: 1,
+    },
+    pickerWrapper: {
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 6,
+        marginBottom: 8,
+        overflow: 'hidden',
+    },
+    modalBackdrop: {
+        flex: 1,
+        justifyContent: 'center',
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        padding: 20,
+    },
+    modalContainer: {
+        backgroundColor: 'white',
+        borderRadius: 10,
+        padding: 20,
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 12,
+    },
+    categoryHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-end',
+        marginBottom: 4,
+    },
+    addCategory: {
+        fontSize: 12,
+        color: '#007bff',
+    },
+    actions: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        gap: 10,
+    },
+    
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.3)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalContent: {
+        backgroundColor: '#fff',
+        padding: 16,
+        borderRadius: 12,
+        width: '90%',
+    },
+
+    
+    overlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.4)',
+        justifyContent: 'center',
+        padding: 20,
+    },
+    title: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 10,
+    },
+    buttonGroup: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+    },
+    cancelButton: {
+        marginRight: 10,
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+    },
+    cancelText: {
+        color: 'gray',
+    },
+    saveButton: {
+        backgroundColor: '#007bff',
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        borderRadius: 6,
+    },
+    saveText: {
+        color: '#fff',
+    },
 });

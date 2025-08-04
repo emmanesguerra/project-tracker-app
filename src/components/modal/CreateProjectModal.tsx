@@ -1,5 +1,12 @@
+import { styles } from '@/src/styles/global';
 import { FC } from 'react';
-import { Modal, Pressable, Text, TextInput, View } from 'react-native';
+import {
+    Modal,
+    Pressable,
+    Text,
+    TextInput,
+    View
+} from 'react-native';
 
 interface CreateProjectModalProps {
     visible: boolean;
@@ -18,53 +25,23 @@ const CreateProjectModal: FC<CreateProjectModalProps> = ({
 }) => {
     return (
         <Modal visible={visible} transparent animationType="slide">
-            <View
-                style={{
-                    flex: 1,
-                    backgroundColor: 'rgba(0,0,0,0.4)',
-                    justifyContent: 'center',
-                    padding: 20,
-                }}
-            >
-                <View
-                    style={{
-                        backgroundColor: '#fff',
-                        borderRadius: 10,
-                        padding: 20,
-                    }}
-                >
-                    <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 10 }}>New Project Name</Text>
+            <View style={styles.overlay}>
+                <View style={styles.modalContainer}>
+                    <Text style={styles.title}>New Project Name</Text>
                     <TextInput
                         placeholder="Enter project name"
                         value={newProjectName}
                         onChangeText={setNewProjectName}
-                        style={{
-                            borderColor: '#ccc',
-                            borderWidth: 1,
-                            padding: 8,
-                            borderRadius: 6,
-                            marginBottom: 12,
-                        }}
+                        style={styles.input}
                     />
 
-                    <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
-                        <Pressable
-                            onPress={onClose}
-                            style={{ marginRight: 10, paddingVertical: 6, paddingHorizontal: 12 }}
-                        >
-                            <Text style={{ color: 'gray' }}>Cancel</Text>
+                    <View style={styles.buttonGroup}>
+                        <Pressable onPress={onClose} style={styles.cancelButton}>
+                            <Text style={styles.cancelText}>Cancel</Text>
                         </Pressable>
 
-                        <Pressable
-                            onPress={onSave}
-                            style={{
-                                backgroundColor: '#007bff',
-                                paddingVertical: 6,
-                                paddingHorizontal: 12,
-                                borderRadius: 6,
-                            }}
-                        >
-                            <Text style={{ color: '#fff' }}>Save</Text>
+                        <Pressable onPress={onSave} style={styles.saveButton}>
+                            <Text style={styles.saveText}>Save</Text>
                         </Pressable>
                     </View>
                 </View>
