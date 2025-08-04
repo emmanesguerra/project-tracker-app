@@ -1,8 +1,9 @@
 import { addReceipt } from '@/src/database/receipts';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useState } from 'react';
-import { Alert, Button, StyleSheet, Text, TextInput } from 'react-native';
+import { Alert, Button, Platform, StyleSheet, Text, TextInput, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function NewReceiptPage() {
@@ -12,7 +13,8 @@ export default function NewReceiptPage() {
 
     const [name, setName] = useState('');
     const [amount, setAmount] = useState('');
-    const [issuedAt, setIssuedAt] = useState(new Date().toISOString().slice(0, 10)); // YYYY-MM-DD
+    const [issuedAt, setIssuedAt] = useState(new Date());
+    const [showDatePicker, setShowDatePicker] = useState(false);
 
     const handleSave = async () => {
         if (!name || !amount || isNaN(Number(amount))) {
@@ -27,13 +29,20 @@ export default function NewReceiptPage() {
                 null, // categoryId is optional/null for now
                 name,
                 parseFloat(amount),
-                issuedAt
+                issuedAt.toISOString().slice(0, 10)
             );
             Alert.alert('Success', 'Receipt added');
             router.back();
         } catch (err) {
             console.error('Failed to save receipt', err);
             Alert.alert('Error', 'Could not save receipt.');
+        }
+    };
+
+    const onDateChange = (event, selectedDate) => {
+        setShowDatePicker(false);
+        if (selectedDate) {
+            setIssuedAt(selectedDate);
         }
     };
 
@@ -58,13 +67,18 @@ export default function NewReceiptPage() {
                 style={styles.input}
             />
 
-            <Text>Issued At (YYYY-MM-DD)</Text>
-            <TextInput
-                value={issuedAt}
-                onChangeText={setIssuedAt}
-                placeholder="e.g. 2025-08-03"
-                style={styles.input}
-            />
+            <Text>Issued At</Text>
+            <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.input}>
+                <Text>{issuedAt.toISOString().slice(0, 10)}</Text>
+            </TouchableOpacity>
+            {showDatePicker && (
+                <DateTimePicker
+                    value={issuedAt}
+                    mode="date"
+                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                    onChange={onDateChange}
+                />
+            )}
 
             <Button title="Save Receipt" onPress={handleSave} />
         </SafeAreaView>
