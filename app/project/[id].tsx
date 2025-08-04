@@ -1,10 +1,11 @@
 import EditProjectModal from '@/src/components/modal/EditProjectModal';
 import { updateProject as saveProjectChanges } from '@/src/database/project';
+import { useReceipts } from '@/src/database/receipts';
 import { Feather } from '@expo/vector-icons';
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ProjectPage() {
@@ -14,6 +15,7 @@ export default function ProjectPage() {
     const [modalVisible, setModalVisible] = useState(false);
     const [description, setDescription] = useState('');
     const [budget, setBudget] = useState('');
+    const { receipts, refreshReceipts } = useReceipts(project?.id);
 
     const fetchProject = async () => {
         try {
@@ -74,6 +76,46 @@ export default function ProjectPage() {
                 <Text style={styles.label}>Created At: {project.created_at}</Text>
                 <Text style={styles.label}>Updated At: {project.updated_at}</Text>
             </View>
+
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 20, marginBottom: 20 }}>Receipts</Text>
+
+                <TouchableOpacity
+                    style={{
+                        backgroundColor: '#007bff',
+                        paddingVertical: 6,
+                        paddingHorizontal: 12,
+                        borderRadius: 6,
+                    }}
+                    onPress={() => router.push(`/receipts/new?projectId=${project.id}`)}
+                >
+                    <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 14 }}>+ Add receipt</Text>
+                </TouchableOpacity>
+            </View>
+
+            <FlatList
+                data={receipts}
+                keyExtractor={(item) => item.id.toString()}
+                renderItem={({ item }) => (
+                    <View
+                        style={{
+                            backgroundColor: '#f0f0f0',
+                            padding: 12,
+                            borderRadius: 8,
+                            marginBottom: 10,
+                        }}
+                    >
+                        <Text style={{ fontWeight: 'bold' }}>{item.name}</Text>
+                        <Text>₱{item.amount.toFixed(2)}</Text>
+                        <Text style={{ fontSize: 12, color: 'gray' }}>Issued At: {item.issued_at}</Text>
+                    </View>
+                )}
+                ListEmptyComponent={
+                    <Text style={{ color: 'gray', fontStyle: 'italic' }}>
+                        No receipts found for this project.
+                    </Text>
+                }
+            />
 
             <EditProjectModal
                 visible={modalVisible}
