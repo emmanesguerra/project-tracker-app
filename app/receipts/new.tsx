@@ -1,3 +1,4 @@
+import ImageCaptureContainer from '@/src/components/ImageCaptureContainer';
 import CategoryModal from '@/src/components/modal/CategoryModal';
 import { addCategory, useCategories } from '@/src/database/categories';
 import { addReceipt } from '@/src/database/receipts';
@@ -24,6 +25,7 @@ export default function NewReceiptPage() {
     const [newCategoryName, setNewCategoryName] = useState('');
 
     const { categories, refreshCategories } = useCategories();
+    const [imageUris, setImageUris] = useState<string[]>([]);
 
     const handleSave = async () => {
         if (!name || !amount || isNaN(Number(amount))) {
@@ -117,6 +119,9 @@ export default function NewReceiptPage() {
                     </TouchableOpacity>
                 </View>
             </View>
+
+            <Text style={styles.label}>Receipt Image</Text>
+            <ImageCaptureContainer imageUris={imageUris} onImageChange={setImageUris} />
 
             {showDatePicker && (
                 <DateTimePicker
