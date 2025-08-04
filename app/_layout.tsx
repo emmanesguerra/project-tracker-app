@@ -1,13 +1,13 @@
 import { initializeDatabase } from '@/src/database/init';
-import { insertDummyData } from '@/src/database/seed'; // ← Add this
 import { Slot } from 'expo-router';
 import { SQLiteProvider } from 'expo-sqlite';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function Layout() {
   const handleInit = async (db: any) => {
+    // await dropDatabase(db);
     await initializeDatabase(db);
-    await insertDummyData(db);
+    // await insertDummyData(db);
   };
 
   return (

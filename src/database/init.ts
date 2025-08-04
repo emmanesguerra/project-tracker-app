@@ -9,6 +9,7 @@ export const initializeDatabase = async (database: SQLiteDatabase) => {
                 name TEXT NOT NULL,
                 description TEXT,
                 budget REAL,
+                total_expense REAL DEFAULT 0,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
             );
@@ -41,6 +42,18 @@ export const initializeDatabase = async (database: SQLiteDatabase) => {
             );
             `
         );
+
+        await database.execAsync(
+            `
+            CREATE TABLE IF NOT EXISTS receipt_images (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                receipt_id INTEGER NOT NULL,
+                image_name TEXT NOT NULL,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (receipt_id) REFERENCES receipts(id) ON DELETE CASCADE
+            );
+            `
+        );
     } catch (error) {
         alert('An error occurred while initializing the database. Please try again later.');
     }
@@ -52,6 +65,7 @@ export const dropDatabase = async (database: SQLiteDatabase) => {
         await database.execAsync(`DROP TABLE IF EXISTS projects;`);
         await database.execAsync(`DROP TABLE IF EXISTS categories;`);
         await database.execAsync(`DROP TABLE IF EXISTS receipts;`);
+        await database.execAsync(`DROP TABLE IF EXISTS receipt_images;`);
 
     } catch (error) {
         alert('An error occurred while initializing the database. Please try again later.');
