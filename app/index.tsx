@@ -1,8 +1,16 @@
 import CreateProjectModal from '@/src/components/modal/CreateProjectModal';
 import { addProject, useProjects } from '@/src/database/project';
+import { styles } from '@/src/styles/global';
+import Octicons from '@expo/vector-icons/Octicons';
 import { Link } from 'expo-router';
 import { useState } from 'react';
-import { FlatList, Pressable, StatusBar, Text, View } from 'react-native';
+import {
+  FlatList,
+  Pressable,
+  StatusBar,
+  Text,
+  View
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function HomePage() {
@@ -23,40 +31,41 @@ export default function HomePage() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, padding: 16 }}>
+    <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
 
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Projects</Text>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Projects</Text>
 
-        <Pressable
-          style={{
-            backgroundColor: '#007bff',
-            paddingVertical: 6,
-            paddingHorizontal: 12,
-            borderRadius: 6,
-          }}
-          onPress={() => setModalVisible(true)}
-        >
-          <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 14 }}>+ Create New Project</Text>
+        <Pressable style={styles.createButton} onPress={() => setModalVisible(true)}>
+          <Text style={styles.createButtonText}>+ Create New Project</Text>
         </Pressable>
       </View>
 
       <FlatList
         data={projects}
         keyExtractor={(item) => item.id.toString()}
+        contentContainerStyle={styles.listContent}
         renderItem={({ item }) => (
           <Link
             href={{ pathname: '/project/[id]', params: { id: item.id.toString() } }}
             asChild
           >
-            <Pressable style={{ marginBottom: 12, padding: 12, backgroundColor: '#f0f0f0', borderRadius: 8 }}>
-              <Text>{item.id}</Text>
-              <Text style={{ fontSize: 16, fontWeight: '600' }}>{item.name}</Text>
-              <Text>{item.description}</Text>
-              <Text>{item.budget}</Text>
-              <Text>{item.created_at}</Text>
-              <Text>{item.updated_at}</Text>
+            <Pressable style={styles.projectItem}>
+              <View style={styles.projectHeader}>
+                <Octicons name="project" size={20} color="#333" style={styles.projectIcon} />
+                <Text style={styles.projectName}>{item.name}</Text>
+              </View>
+
+              {item.description && item.description.length > 0 && (
+                <Text style={styles.projectDescription}>{item.description}</Text>
+              )}
+
+              {item.budget != null && item.budget !== 0 && (
+                <Text style={styles.projectBudget}>Budget: ₱{item.budget}</Text>
+              )}
+
+              <Text style={styles.projectDate}>Created: {item.created_at}</Text>
             </Pressable>
           </Link>
         )}

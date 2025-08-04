@@ -1,7 +1,9 @@
 import EditProjectModal from '@/src/components/modal/EditProjectModal';
 import { getProjectById, updateProject as saveProjectChanges } from '@/src/database/project';
 import { useReceipts } from '@/src/database/receipts';
-import { Feather } from '@expo/vector-icons';
+import { styles } from '@/src/styles/global';
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useEffect, useState } from 'react';
@@ -9,10 +11,9 @@ import {
     FlatList,
     Image,
     ScrollView,
-    StyleSheet,
     Text,
     TouchableOpacity,
-    View,
+    View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -80,69 +81,46 @@ export default function ProjectPage() {
 
     if (!project) {
         return (
-            <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <SafeAreaView style={styles.centeredContainer}>
                 <Text>Loading project...</Text>
             </SafeAreaView>
         );
     }
 
     return (
-        <SafeAreaView style={{ flex: 1, padding: 16 }}>
-            <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 10 }}>{project.name}</Text>
+        <SafeAreaView style={styles.container}>
+            <Text style={styles.pageTitle}>{project.name}</Text>
 
             <View style={styles.box}>
-                <View style={{ position: 'absolute', right: 8, top: 8 }}>
-                    <TouchableOpacity
-                        style={{
-                            backgroundColor: '#79b3f1ff',
-                            paddingVertical: 3,
-                            paddingHorizontal: 3,
-                            borderRadius: 2,
-                        }}
-                        onPress={() => setModalVisible(true)}
-                    >
-                        <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 14 }}>
-                            <Feather name="edit" size={16} color="#FFF" />
-                        </Text>
+                <View style={styles.editButtonContainer}>
+                    <TouchableOpacity style={styles.editButton} onPress={() => setModalVisible(true)}>
+                        <FontAwesome6 name="edit" size={24} color="black" />
                     </TouchableOpacity>
                 </View>
 
-                <Text style={styles.label}>Description: {project.description}</Text>
+                {project.description && project.description.length > 0 && (
+                <Text style={styles.label}>{project.description}</Text>
+                )}
+                {project.budget && project.budget.length > 0 && (
                 <Text style={styles.label}>Budget: ₱{project.budget}</Text>
-                <Text style={styles.label}>Created At: {project.created_at}</Text>
-                <Text style={styles.label}>Updated At: {project.updated_at}</Text>
+                )}
+                <Text style={styles.label}>Expense: ₱{project.total_expense}</Text>
+                <Text style={[styles.label, styles.small]}>Create: {project.created_at}</Text>
+                <Text style={[styles.label, styles.small]}>Update: {project.updated_at}</Text>
             </View>
 
-            <View
-                style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: 16,
-                }}
-            >
-                <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 20, marginBottom: 20 }}>
-                    Receipts
-                </Text>
+            <View style={styles.receiptHeader}>
+                <Text style={styles.receiptTitle}>Receipts</Text>
 
                 <TouchableOpacity
-                    style={{
-                        backgroundColor: '#007bff',
-                        paddingVertical: 6,
-                        paddingHorizontal: 12,
-                        borderRadius: 6,
-                    }}
+                    style={styles.addButton}
                     onPress={() =>
                         router.push(
-                            `/receipts/new?projectId=${project.id}&projectName=${encodeURIComponent(
-                                project.name
-                            )}`
+                            `/receipts/new?projectId=${project.id}&projectName=${encodeURIComponent(project.name)}`
                         )
                     }
                 >
-                    <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 14 }}>
-                        + Add receipt
-                    </Text>
+                    <Text style={styles.addButtonText}>+ Add receipt</Text>
                 </TouchableOpacity>
             </View>
 
@@ -151,45 +129,46 @@ export default function ProjectPage() {
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={({ item }) => (
                     <View style={styles.receiptCard}>
-                        <Text style={{ fontWeight: 'bold' }}>{item.name}</Text>
-                        <Text>₱{item.amount.toFixed(2)}</Text>
-                        <Text>{item.category_name}</Text>
-                        <Text style={{ fontSize: 12, color: 'gray' }}>
-                            Issued At: {item.issued_at}
-                        </Text>
+                        <View style={styles.receiptCardLeft}>
+                            <Text style={styles.receiptName}>{item.name}</Text>
+                            <Text style={styles.receiptAmount}>₱{item.amount.toFixed(2)}</Text>
+                            <Text style={styles.receiptCategory}>{item.category_name}</Text>
+                            <Text style={styles.receiptDate}>Issued At: {item.issued_at}</Text>
 
-                        {receiptImages[item.id]?.length > 0 && (
-                            <ScrollView horizontal style={{ marginTop: 8 }}>
-                                {receiptImages[item.id].map((uri, index) => (
-                                    <Image
-                                        key={index}
-                                        source={{ uri }}
-                                        style={styles.image}
-                                        resizeMode="cover"
-                                    />
-                                ))}
-                            </ScrollView>
-                        )}
-                        <TouchableOpacity
-                            style={styles.viewGalleryButton}
-                            onPress={() =>
-                                router.push({
-                                    pathname: '/gallery',
-                                    params: {
-                                        projectId: project.id,
-                                        receiptId: item.id,
-                                    },
-                                })
-                            }
-                        >
-                            <Text style={styles.viewGalleryText}>📷 View Gallery</Text>
-                        </TouchableOpacity>
+                        </View>
+                        <View style={styles.receiptCardRight}>
+                            {receiptImages[item.id]?.length > 0 && (
+                                <ScrollView horizontal style={styles.imageScroll}>
+                                    {receiptImages[item.id].map((uri, index) => (
+                                        <Image
+                                            key={index}
+                                            source={{ uri }}
+                                            style={styles.image}
+                                            resizeMode="cover"
+                                        />
+                                    ))}
+                                </ScrollView>
+                            )}
+
+                            <TouchableOpacity
+                                style={styles.viewGalleryButton}
+                                onPress={() =>
+                                    router.push({
+                                        pathname: '/gallery',
+                                        params: {
+                                            projectId: project.id,
+                                            receiptId: item.id,
+                                        },
+                                    })
+                                }
+                            >
+                                <Text style={styles.viewGalleryText}><MaterialIcons name="attachment" size={16} color="white" /> Images</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 )}
                 ListEmptyComponent={
-                    <Text style={{ color: 'gray', fontStyle: 'italic' }}>
-                        No receipts found for this project.
-                    </Text>
+                    <Text style={styles.emptyText}>No receipts found for this project.</Text>
                 }
             />
 
@@ -205,42 +184,3 @@ export default function ProjectPage() {
         </SafeAreaView>
     );
 }
-
-const styles = StyleSheet.create({
-    box: {
-        backgroundColor: '#e0f0ff',
-        padding: 12,
-        borderRadius: 5,
-        position: 'relative',
-        marginTop: 10,
-    },
-    label: {
-        fontSize: 14,
-        marginBottom: 6,
-    },
-    receiptCard: {
-        backgroundColor: '#f0f0f0',
-        padding: 12,
-        borderRadius: 8,
-        marginBottom: 10,
-    },
-    image: {
-        width: 100,
-        height: 100,
-        marginRight: 10,
-        borderRadius: 8,
-    },
-    viewGalleryButton: {
-        marginTop: 8,
-        paddingVertical: 6,
-        paddingHorizontal: 12,
-        backgroundColor: '#4682B4',
-        borderRadius: 6,
-        alignSelf: 'flex-start',
-    },
-    viewGalleryText: {
-        color: '#fff',
-        fontWeight: 'bold',
-        fontSize: 14,
-    },
-});
