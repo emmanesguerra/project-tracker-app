@@ -19,7 +19,7 @@ export function useReceipts(projectId: number) {
     const fetchReceipts = async () => {
         try {
             const results = await db.getAllAsync<Receipt>(
-                'SELECT * FROM receipts WHERE project_id = ? ORDER BY issued_at DESC',
+                'SELECT * FROM receipts WHERE project_id = ? ORDER BY issued_at DESC, id DESC',
                 [projectId]
             );
             setReceipts(results);

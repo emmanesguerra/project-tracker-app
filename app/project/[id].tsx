@@ -87,7 +87,7 @@ export default function ProjectPage() {
                         paddingHorizontal: 12,
                         borderRadius: 6,
                     }}
-                    onPress={() => router.push(`/receipts/new?projectId=${project.id}`)}
+                    onPress={() => router.push(`/receipts/new?projectId=${project.id}&projectName=${encodeURIComponent(project.name)}`)}
                 >
                     <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 14 }}>+ Add receipt</Text>
                 </TouchableOpacity>

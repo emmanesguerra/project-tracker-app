@@ -1,4 +1,4 @@
-// app/receipts/new.tsx
+import { addReceipt } from '@/src/database/receipts';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useState } from 'react';
@@ -6,7 +6,7 @@ import { Alert, Button, StyleSheet, Text, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function NewReceiptPage() {
-    const { projectId } = useLocalSearchParams<{ projectId: string }>();
+    const { projectId, projectName } = useLocalSearchParams();
     const db = useSQLiteContext();
     const router = useRouter();
 
@@ -15,13 +15,22 @@ export default function NewReceiptPage() {
     const [issuedAt, setIssuedAt] = useState(new Date().toISOString().slice(0, 10)); // YYYY-MM-DD
 
     const handleSave = async () => {
+        if (!name || !amount || isNaN(Number(amount))) {
+            Alert.alert('Validation Error', 'Please enter valid name and amount.');
+            return;
+        }
+
         try {
-            await db.runAsync(
-                `INSERT INTO receipts (project_id, name, amount, issued_at) VALUES (?, ?, ?, ?)`,
-                [projectId, name, parseFloat(amount), issuedAt]
+            await addReceipt(
+                db,
+                Number(projectId),
+                null, // categoryId is optional/null for now
+                name,
+                parseFloat(amount),
+                issuedAt
             );
             Alert.alert('Success', 'Receipt added');
-            router.back(); // Go back to the project page
+            router.back();
         } catch (err) {
             console.error('Failed to save receipt', err);
             Alert.alert('Error', 'Could not save receipt.');
@@ -30,7 +39,7 @@ export default function NewReceiptPage() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <Text style={styles.header}>New Receipt</Text>
+            <Text style={styles.header}>{projectName ? `Receipt for ${projectName}` : 'New Receipt'}</Text>
 
             <Text>Name</Text>
             <TextInput
