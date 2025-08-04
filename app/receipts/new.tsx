@@ -1,9 +1,11 @@
+import { useCategories } from '@/src/database/categories';
 import { addReceipt } from '@/src/database/receipts';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { Picker } from '@react-native-picker/picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useState } from 'react';
-import { Alert, Button, Platform, StyleSheet, Text, TextInput, TouchableOpacity } from 'react-native';
+import { Alert, Button, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function NewReceiptPage() {
@@ -15,6 +17,9 @@ export default function NewReceiptPage() {
     const [amount, setAmount] = useState('');
     const [issuedAt, setIssuedAt] = useState(new Date());
     const [showDatePicker, setShowDatePicker] = useState(false);
+    const [categoryId, setCategoryId] = useState<number | null>(null);
+
+    const { categories } = useCategories();
 
     const handleSave = async () => {
         if (!name || !amount || isNaN(Number(amount))) {
@@ -26,7 +31,7 @@ export default function NewReceiptPage() {
             await addReceipt(
                 db,
                 Number(projectId),
-                null, // categoryId is optional/null for now
+                categoryId,
                 name,
                 parseFloat(amount),
                 issuedAt.toISOString().slice(0, 10)
@@ -39,10 +44,10 @@ export default function NewReceiptPage() {
         }
     };
 
-    const onDateChange = (event, selectedDate) => {
+    const onDateChange = (event: any, date?: Date) => {
         setShowDatePicker(false);
-        if (selectedDate) {
-            setIssuedAt(selectedDate);
+        if (date) {
+            setIssuedAt(date);
         }
     };
 
@@ -58,19 +63,39 @@ export default function NewReceiptPage() {
                 style={styles.input}
             />
 
-            <Text>Amount (₱)</Text>
-            <TextInput
-                value={amount}
-                onChangeText={setAmount}
-                placeholder="Enter amount"
-                keyboardType="numeric"
-                style={styles.input}
-            />
+            <Text>Category</Text>
+            <View style={styles.pickerWrapper}>
+                <Picker
+                    selectedValue={categoryId}
+                    onValueChange={(itemValue) => setCategoryId(itemValue)}
+                >
+                    <Picker.Item label="Select Category" value={null} />
+                    {categories.map((category) => (
+                        <Picker.Item key={category.id} label={category.name} value={category.id} />
+                    ))}
+                </Picker>
+            </View>
 
-            <Text>Issued At</Text>
-            <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.input}>
-                <Text>{issuedAt.toISOString().slice(0, 10)}</Text>
-            </TouchableOpacity>
+            <View style={styles.row}>
+                <View style={styles.halfInputContainer}>
+                    <Text>Amount (₱)</Text>
+                    <TextInput
+                        value={amount}
+                        onChangeText={setAmount}
+                        placeholder="Enter amount"
+                        keyboardType="numeric"
+                        style={styles.input}
+                    />
+                </View>
+
+                <View style={styles.halfInputContainer}>
+                    <Text>Issued At</Text>
+                    <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.input}>
+                        <Text>{issuedAt.toISOString().slice(0, 10)}</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+
             {showDatePicker && (
                 <DateTimePicker
                     value={issuedAt}
@@ -94,5 +119,20 @@ const styles = StyleSheet.create({
         padding: 10,
         marginBottom: 12,
         borderRadius: 6,
+    },
+    row: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        gap: 10,
+    },
+    halfInputContainer: {
+        flex: 1,
+    },
+    pickerWrapper: {
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 6,
+        marginBottom: 12,
+        overflow: 'hidden',
     },
 });

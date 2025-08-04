@@ -2,6 +2,7 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { useEffect, useState } from 'react';
 
 export interface Receipt {
+    category_name: string;
     id: number;
     project_id: number;
     category_id: number | null;
@@ -19,7 +20,16 @@ export function useReceipts(projectId: number) {
     const fetchReceipts = async () => {
         try {
             const results = await db.getAllAsync<Receipt>(
-                'SELECT * FROM receipts WHERE project_id = ? ORDER BY issued_at DESC, id DESC',
+                `
+                SELECT 
+                    r.id, r.project_id, r.category_id, c.name AS category_name,
+                    r.name, r.amount, r.issued_at,
+                    r.created_at, r.updated_at
+                FROM receipts r
+                LEFT JOIN categories c ON r.category_id = c.id
+                WHERE r.project_id = ?
+                ORDER BY r.issued_at DESC, r.id DESC
+                `,
                 [projectId]
             );
             setReceipts(results);

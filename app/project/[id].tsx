@@ -107,6 +107,7 @@ export default function ProjectPage() {
                     >
                         <Text style={{ fontWeight: 'bold' }}>{item.name}</Text>
                         <Text>₱{item.amount.toFixed(2)}</Text>
+                        <Text>{item.category_name}</Text>
                         <Text style={{ fontSize: 12, color: 'gray' }}>Issued At: {item.issued_at}</Text>
                     </View>
                 )}
