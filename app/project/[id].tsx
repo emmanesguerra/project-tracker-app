@@ -170,6 +170,20 @@ export default function ProjectPage() {
                                 ))}
                             </ScrollView>
                         )}
+                        <TouchableOpacity
+                            style={styles.viewGalleryButton}
+                            onPress={() =>
+                                router.push({
+                                    pathname: '/gallery',
+                                    params: {
+                                        projectId: project.id,
+                                        receiptId: item.id,
+                                    },
+                                })
+                            }
+                        >
+                            <Text style={styles.viewGalleryText}>📷 View Gallery</Text>
+                        </TouchableOpacity>
                     </View>
                 )}
                 ListEmptyComponent={
@@ -215,5 +229,18 @@ const styles = StyleSheet.create({
         height: 100,
         marginRight: 10,
         borderRadius: 8,
+    },
+    viewGalleryButton: {
+        marginTop: 8,
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        backgroundColor: '#4682B4',
+        borderRadius: 6,
+        alignSelf: 'flex-start',
+    },
+    viewGalleryText: {
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 14,
     },
 });
