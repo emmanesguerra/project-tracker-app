@@ -1,5 +1,5 @@
 import EditProjectModal from '@/src/components/modal/EditProjectModal';
-import { updateProject as saveProjectChanges } from '@/src/database/project';
+import { getProjectById, updateProject as saveProjectChanges } from '@/src/database/project';
 import { useReceipts } from '@/src/database/receipts';
 import { Feather } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -19,10 +19,12 @@ export default function ProjectPage() {
 
     const fetchProject = async () => {
         try {
-            const result = await db.getFirstAsync('SELECT * FROM projects WHERE id = ?', [id]);
-            setProject(result);
-            setDescription(result?.description || '');
-            setBudget(result?.budget?.toString() || '');
+            const result = await getProjectById(db, Number(id));
+            if (result) {
+                setProject(result);
+                setDescription(result.description || '');
+                setBudget(result.budget?.toString() || '');
+            }
         } catch (error) {
             console.error('Error loading project:', error);
         }

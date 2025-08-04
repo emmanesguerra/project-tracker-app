@@ -1,3 +1,4 @@
+// src/database/project.ts
 import { useSQLiteContext } from 'expo-sqlite';
 import { useEffect, useState } from 'react';
 
@@ -57,5 +58,18 @@ export async function updateProject(
   } catch (error) {
     console.error('Error updating project:', error);
     throw error;
+  }
+}
+
+export async function getProjectById(
+  db: ReturnType<typeof useSQLiteContext>,
+  id: number
+): Promise<Project | null> {
+  try {
+    const result = await db.getFirstAsync<Project>('SELECT * FROM projects WHERE id = ?', [id]);
+    return result ?? null;
+  } catch (error) {
+    console.error('Error fetching project by ID:', error);
+    return null;
   }
 }
