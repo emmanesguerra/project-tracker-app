@@ -1,19 +1,32 @@
 import * as FileSystem from 'expo-file-system';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Image, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+    ActivityIndicator,
+    Dimensions,
+    Image,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native';
+import ImageViewing from 'react-native-image-viewing';
+
+const { width, height } = Dimensions.get('window');
 
 const GalleryPage = () => {
     const { projectId, receiptId } = useLocalSearchParams();
     const [imageUris, setImageUris] = useState<string[]>([]);
-    const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [selectedIndex, setSelectedIndex] = useState(0);
+    const [viewerVisible, setViewerVisible] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const loadImages = async () => {
             try {
                 const folderPath = `${FileSystem.documentDirectory}${projectId}/${receiptId}/`;
                 const files = await FileSystem.readDirectoryAsync(folderPath);
-
                 const imagePaths = files
                     .filter(file => file.endsWith('.jpg') || file.endsWith('.png'))
                     .map(file => folderPath + file);
@@ -21,29 +34,76 @@ const GalleryPage = () => {
                 setImageUris(imagePaths);
             } catch (error) {
                 console.error('Failed to load images:', error);
+            } finally {
+                setLoading(false);
             }
         };
 
         loadImages();
     }, [projectId, receiptId]);
 
-    return (
-        <ScrollView contentContainerStyle={styles.container}>
-            {imageUris.map((uri, index) => (
-                <TouchableOpacity key={index} onPress={() => setSelectedImage(uri)}>
-                    <Image source={{ uri }} style={styles.image} />
-                </TouchableOpacity>
-            ))}
+    const openViewer = (index: number) => {
+        setSelectedIndex(index);
+        setViewerVisible(true);
+    };
 
-            <Modal visible={!!selectedImage} transparent={true} animationType="fade">
-                <View style={styles.modalContainer}>
-                    <TouchableOpacity onPress={() => setSelectedImage(null)} style={styles.closeButton}>
-                        <Text style={styles.closeText}>Close</Text>
+    if (loading) {
+        return (
+            <View style={styles.centered}>
+                <ActivityIndicator size="large" color="#007bff" />
+            </View>
+        );
+    }
+
+    if (!imageUris.length) {
+        return (
+            <View style={styles.centered}>
+                <Text style={styles.emptyText}>No images found.</Text>
+            </View>
+        );
+    }
+
+    const imageObjects = imageUris.map(uri => ({ uri }));
+
+    return (
+        <View style={styles.container}>
+            {/* Top Preview Image */}
+            <TouchableOpacity onPress={() => openViewer(selectedIndex)} activeOpacity={0.9}>
+                <Image
+                    source={{ uri: imageUris[selectedIndex] }}
+                    style={styles.previewImage}
+                    resizeMode="contain"
+                />
+            </TouchableOpacity>
+
+            {/* Thumbnail Scroll */}
+            <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.thumbnailScroll}
+            >
+                {imageUris.map((uri, index) => (
+                    <TouchableOpacity
+                        key={index}
+                        onPress={() => setSelectedIndex(index)}
+                        style={[
+                            styles.thumbnailWrapper,
+                            selectedIndex === index && styles.activeThumbnail,
+                        ]}
+                    >
+                        <Image source={{ uri }} style={styles.thumbnail} />
                     </TouchableOpacity>
-                    {selectedImage && <Image source={{ uri: selectedImage }} style={styles.fullImage} />}
-                </View>
-            </Modal>
-        </ScrollView>
+                ))}
+            </ScrollView>
+
+            {/* Fullscreen Viewer */}
+            <ImageViewing
+                images={imageObjects}
+                imageIndex={selectedIndex}
+                visible={viewerVisible}
+                onRequestClose={() => setViewerVisible(false)}
+            />
+        </View>
     );
 };
 
@@ -51,39 +111,39 @@ export default GalleryPage;
 
 const styles = StyleSheet.create({
     container: {
-        padding: 10,
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: 10,
-        justifyContent: 'center',
-    },
-    image: {
-        width: 100,
-        height: 100,
-        margin: 5,
-        borderRadius: 10,
-    },
-    modalContainer: {
         flex: 1,
-        backgroundColor: '#000000cc',
+        backgroundColor: '#fff',
+    },
+    previewImage: {
+        width: width,
+        height: height * 0.8,
+        backgroundColor: '#000',
+    },
+    thumbnailScroll: {
+        paddingHorizontal: 20,
+        alignItems: 'center',
+    },
+    thumbnailWrapper: {
+        marginRight: 10,
+        borderRadius: 8,
+        borderWidth: 2,
+        borderColor: 'transparent',
+    },
+    activeThumbnail: {
+        borderColor: '#007bff',
+    },
+    thumbnail: {
+        width: 100,
+        height: 120,
+        borderRadius: 8,
+    },
+    centered: {
+        flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
     },
-    fullImage: {
-        width: '90%',
-        height: '70%',
-        resizeMode: 'contain',
-    },
-    closeButton: {
-        position: 'absolute',
-        top: 50,
-        right: 30,
-        padding: 10,
-        backgroundColor: '#fff',
-        borderRadius: 8,
-    },
-    closeText: {
+    emptyText: {
         fontSize: 16,
-        fontWeight: 'bold',
+        color: '#888',
     },
 });
